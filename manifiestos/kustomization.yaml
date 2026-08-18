@@ -11,6 +11,8 @@ resources:
   - service_backend.yaml
   - service_frontend.yaml
   - service_postgres.yaml
+  - sealedsecret-postgres.yaml
+  - sealedsecret-backend.yaml
 
 
 
