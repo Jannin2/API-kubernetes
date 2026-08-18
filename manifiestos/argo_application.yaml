@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: miniorders
+  namespace: argo
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/Jannin2/API-kubernetes.git
+    targetRevision: main
+    path: manifiestos
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: miniorders
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

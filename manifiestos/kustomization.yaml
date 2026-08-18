@@ -6,8 +6,6 @@ resources:
   - deployment_frontend.yaml
   - deployment_postgress.yaml
   - name_space.yaml
-  - secreto.yaml
-  - secrets_backend.yaml
   - service_backend.yaml
   - service_frontend.yaml
   - service_postgres.yaml
