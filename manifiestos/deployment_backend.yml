@@ -1,0 +1,25 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: miniorders
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      backend: deployment
+  template: 
+    metadata:
+      labels :
+        backend : deployment
+    spec:
+      containers:
+        - name: backend
+          image: docker.io/jannin26m/miniorders-backend:1.0.0
+          ports:
+            - containerPort: 8000
+          envFrom: 
+            - secretRef:
+                name: secret-postgres
+            - secretRef:
+                name: config-backend

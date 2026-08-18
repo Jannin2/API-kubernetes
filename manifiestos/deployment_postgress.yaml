@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-postgres
+  namespace: miniorders
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      deployment-postgres : label-deploy-postgres
+  template:
+    metadata:
+      labels : 
+        deployment-postgres : label-deploy-postgres
+    spec:
+      containers:
+        - name: deployment-postgres
+          image: postgres:16-alpine
+          envFrom: 
+            - secretRef:
+                name: secret-postgres
+          
+

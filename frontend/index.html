@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 420px;
+        margin: 40px auto;
+        color: #222;
+      }
+      h1 {
+        font-size: 1.4rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+      }
+      td {
+        padding: 8px 0;
+      }
+      td:last-child {
+        text-align: right;
+      }
+      button {
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+      #message {
+        margin-top: 12px;
+        min-height: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Productos</h1>
+    <table>
+      <tbody id="products"></tbody>
+    </table>
+    <button id="create-order">Crear pedido</button>
+    <p id="message"></p>
+
+    <script>
+      // En Docker Compose, nginx reenvía estas rutas al backend.
+      // En Kubernetes podrás cambiar esto con un ConfigMap.
+      const API_URL = "http://localhost:8000";
+
+      function formatPrice(price) {
+        return "$" + price.toLocaleString("es-CO");
+      }
+
+      async function loadProducts() {
+        const response = await fetch(API_URL + "/products");
+        const products = await response.json();
+        const tbody = document.getElementById("products");
+        tbody.innerHTML = products
+          .map(
+            (p) =>
+              `<tr><td>${p.name}</td><td>${formatPrice(p.price)}</td></tr>`
+          )
+          .join("");
+        return products;
+      }
+
+      document.getElementById("create-order").addEventListener("click", async () => {
+        const message = document.getElementById("message");
+        try {
+          const response = await fetch(API_URL + "/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: 1, quantity: 1 }),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(JSON.stringify(data));
+          }
+          message.textContent = "Pedido creado: id " + data.id;
+        } catch (err) {
+          message.textContent = "Error al crear el pedido";
+        }
+      });
+
+      loadProducts().catch(() => {
+        document.getElementById("message").textContent =
+          "No se pudieron cargar los productos";
+      });
+    </script>
+  </body>
+</html>

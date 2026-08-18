@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-frontend
+  namespace: miniorders
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      frontend : deploy-frontend
+  template:
+    metadata:
+      labels:
+        frontend : deploy-frontend
+    spec: 
+      containers:
+        - name: deployment-frontend
+          image: docker.io/jannin26m/frontend:2.46
+          ports:
+            - containerPort: 80
+      
+
+

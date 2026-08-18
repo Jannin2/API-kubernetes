@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-frontend
+  namespace: miniorders
+
+spec:
+  selector:
+    frontend : deploy-frontend
+
+  ports:
+    - port: 80
+      targetPort: 80 
