@@ -16,7 +16,7 @@ spec:
     spec: 
       containers:
         - name: deployment-frontend
-          image: docker.io/jannin26m/frontend:2.46
+          image: docker.io/jannin26m/frontend:2.47
           ports:
             - containerPort: 80
       

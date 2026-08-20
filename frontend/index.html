@@ -1,94 +1,1066 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Productos</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        max-width: 420px;
-        margin: 40px auto;
-        color: #222;
-      }
-      h1 {
-        font-size: 1.4rem;
-        border-bottom: 1px solid #ccc;
-        padding-bottom: 8px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 16px 0;
-      }
-      td {
-        padding: 8px 0;
-      }
-      td:last-child {
-        text-align: right;
-      }
-      button {
-        padding: 8px 16px;
-        cursor: pointer;
-      }
-      #message {
-        margin-top: 12px;
-        min-height: 1.2em;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Productos</h1>
+
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Mini Orders</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #222;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      margin-top: 30px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    input,
+    select {
+      padding: 9px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    input[type="number"] {
+      width: 150px;
+    }
+
+    select {
+      min-width: 200px;
+    }
+
+    button {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #333;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .btn-edit {
+      background: #555;
+    }
+
+    .btn-delete {
+      background: #b00020;
+    }
+
+    .btn-order {
+      background: #1769aa;
+    }
+
+    .btn-cancel {
+      background: #777;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    #message {
+      margin: 15px 0;
+      min-height: 20px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: #b00020;
+    }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Mini Orders</h1>
+
+  <p id="message"></p>
+
+
+
+  <div class="card">
+
+    <h2>Productos</h2>
+
+    <div class="form">
+
+      <input
+        id="product-name"
+        type="text"
+        placeholder="Nombre del producto"
+      />
+
+      <input
+        id="product-price"
+        type="number"
+        min="0"
+        placeholder="Precio"
+      />
+
+      <button id="save-product">
+        Crear producto
+      </button>
+
+      <button
+        id="cancel-edit"
+        class="btn-cancel"
+        style="display: none;"
+      >
+        Cancelar
+      </button>
+
+    </div>
+
     <table>
-      <tbody id="products"></tbody>
+
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody id="products">
+      </tbody>
+
     </table>
-    <button id="create-order">Crear pedido</button>
-    <p id="message"></p>
 
-    <script>
-      // En Docker Compose, nginx reenvía estas rutas al backend.
-      // En Kubernetes podrás cambiar esto con un ConfigMap.
-      const API_URL = "http://localhost:8000";
+  </div>
 
-      function formatPrice(price) {
-        return "$" + price.toLocaleString("es-CO");
-      }
 
-      async function loadProducts() {
-        const response = await fetch(API_URL + "/products");
-        const products = await response.json();
-        const tbody = document.getElementById("products");
-        tbody.innerHTML = products
-          .map(
-            (p) =>
-              `<tr><td>${p.name}</td><td>${formatPrice(p.price)}</td></tr>`
-          )
-          .join("");
-        return products;
-      }
 
-      document.getElementById("create-order").addEventListener("click", async () => {
-        const message = document.getElementById("message");
-        try {
-          const response = await fetch(API_URL + "/orders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ product_id: 1, quantity: 1 }),
-          });
-          const data = await response.json();
-          if (!response.ok) {
-            throw new Error(JSON.stringify(data));
-          }
-          message.textContent = "Pedido creado: id " + data.id;
-        } catch (err) {
-          message.textContent = "Error al crear el pedido";
+
+  <div class="card">
+
+    <h2>Crear pedido</h2>
+
+    <div class="form">
+
+      <select id="order-product">
+        <option value="">
+          Selecciona un producto
+        </option>
+      </select>
+
+      <input
+        id="order-quantity"
+        type="number"
+        min="1"
+        value="1"
+      />
+
+      <button
+        id="create-order"
+        class="btn-order"
+      >
+        Crear pedido
+      </button>
+
+    </div>
+
+  </div>
+
+
+ 
+
+  <div class="card">
+
+    <h2>Pedidos</h2>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody id="orders">
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <script>
+
+
+
+    // Las peticiones utilizan el mismo dominio
+    // y Nginx las redirige al backend.
+    const API_URL = "";
+
+
+    
+
+    let editingProductId = null;
+
+    let products = [];
+
+
+ 
+
+    const productsTable =
+      document.getElementById("products");
+
+    const ordersTable =
+      document.getElementById("orders");
+
+    const productName =
+      document.getElementById("product-name");
+
+    const productPrice =
+      document.getElementById("product-price");
+
+    const saveProductButton =
+      document.getElementById("save-product");
+
+    const cancelEditButton =
+      document.getElementById("cancel-edit");
+
+    const orderProduct =
+      document.getElementById("order-product");
+
+    const orderQuantity =
+      document.getElementById("order-quantity");
+
+    const createOrderButton =
+      document.getElementById("create-order");
+
+    const message =
+      document.getElementById("message");
+
+
+ 
+
+    function showMessage(text, type = "success") {
+
+      message.textContent = text;
+
+      message.className = type;
+
+    }
+
+
+  
+
+    function formatPrice(price) {
+
+      return "$" +
+        Number(price).toLocaleString("es-CO");
+
+    }
+
+
+  
+
+    async function loadProducts() {
+
+      try {
+
+        const response =
+          await fetch(API_URL + "/products");
+
+        if (!response.ok) {
+
+          throw new Error(
+            "No se pudieron cargar los productos"
+          );
+
         }
+
+        products = await response.json();
+
+        renderProducts();
+
+        loadProductOptions();
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "No se pudieron cargar los productos",
+          "error"
+        );
+
+      }
+
+    }
+
+
+   
+
+    function renderProducts() {
+
+      if (products.length === 0) {
+
+        productsTable.innerHTML = `
+          <tr>
+            <td
+              colspan="3"
+              class="empty"
+            >
+              No hay productos
+            </td>
+          </tr>
+        `;
+
+        return;
+      }
+
+
+      productsTable.innerHTML =
+        products
+          .map(product => {
+
+            return `
+              <tr>
+
+                <td>
+                  ${escapeHtml(product.name)}
+                </td>
+
+                <td>
+                  ${formatPrice(product.price)}
+                </td>
+
+                <td>
+
+                  <div class="actions">
+
+                    <button
+                      class="btn-edit"
+                      onclick="editProduct(${product.id})"
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      class="btn-delete"
+                      onclick="deleteProduct(${product.id})"
+                    >
+                      Eliminar
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+   
+    function loadProductOptions() {
+
+      orderProduct.innerHTML = `
+        <option value="">
+          Selecciona un producto
+        </option>
+      `;
+
+
+      products.forEach(product => {
+
+        const option =
+          document.createElement("option");
+
+        option.value = product.id;
+
+        option.textContent =
+          `${product.name} - ${formatPrice(product.price)}`;
+
+        orderProduct.appendChild(option);
+
       });
 
-      loadProducts().catch(() => {
-        document.getElementById("message").textContent =
-          "No se pudieron cargar los productos";
-      });
-    </script>
-  </body>
+    }
+
+
+
+
+    saveProductButton.addEventListener(
+      "click",
+      async () => {
+
+        const name =
+          productName.value.trim();
+
+        const price =
+          Number(productPrice.value);
+
+
+        if (!name) {
+
+          showMessage(
+            "Debes ingresar el nombre del producto",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        if (
+          productPrice.value === "" ||
+          price < 0
+        ) {
+
+          showMessage(
+            "Debes ingresar un precio válido",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        try {
+
+          let response;
+
+
+          // ACTUALIZAR
+          if (editingProductId !== null) {
+
+            response =
+              await fetch(
+                `${API_URL}/products/${editingProductId}`,
+                {
+                  method: "PUT",
+
+                  headers: {
+                    "Content-Type":
+                      "application/json"
+                  },
+
+                  body: JSON.stringify({
+                    name: name,
+                    price: price
+                  })
+                }
+              );
+
+          }
+
+          // CREAR
+          else {
+
+            response =
+              await fetch(
+                API_URL + "/products",
+                {
+                  method: "POST",
+
+                  headers: {
+                    "Content-Type":
+                      "application/json"
+                  },
+
+                  body: JSON.stringify({
+                    name: name,
+                    price: price
+                  })
+                }
+              );
+
+          }
+
+
+          const data =
+            await response.json();
+
+
+          if (!response.ok) {
+
+            throw new Error(
+              data.detail ||
+              "Error al guardar el producto"
+            );
+
+          }
+
+
+          if (editingProductId !== null) {
+
+            showMessage(
+              "Producto actualizado correctamente"
+            );
+
+          } else {
+
+            showMessage(
+              "Producto creado correctamente"
+            );
+
+          }
+
+
+          cancelEdit();
+
+          await loadProducts();
+
+
+        } catch (error) {
+
+          console.error(error);
+
+          showMessage(
+            error.message,
+            "error"
+          );
+
+        }
+
+      }
+    );
+
+
+  
+
+    function editProduct(id) {
+
+      const product =
+        products.find(
+          p => p.id === id
+        );
+
+
+      if (!product) {
+        return;
+      }
+
+
+      editingProductId = id;
+
+
+      productName.value =
+        product.name;
+
+      productPrice.value =
+        product.price;
+
+
+      saveProductButton.textContent =
+        "Actualizar producto";
+
+
+      cancelEditButton.style.display =
+        "inline-block";
+
+
+      productName.focus();
+
+    }
+
+
+  
+
+    cancelEditButton.addEventListener(
+      "click",
+      cancelEdit
+    );
+
+
+    function cancelEdit() {
+
+      editingProductId = null;
+
+
+      productName.value = "";
+
+      productPrice.value = "";
+
+
+      saveProductButton.textContent =
+        "Crear producto";
+
+
+      cancelEditButton.style.display =
+        "none";
+
+    }
+
+
+  
+
+    async function deleteProduct(id) {
+
+      const product =
+        products.find(
+          p => p.id === id
+        );
+
+
+      if (!product) {
+        return;
+      }
+
+
+      const confirmed =
+        confirm(
+          `¿Seguro que quieres eliminar "${product.name}"?`
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_URL}/products/${id}`,
+            {
+              method: "DELETE"
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.detail ||
+            "No se pudo eliminar el producto"
+          );
+
+        }
+
+
+        showMessage(
+          "Producto eliminado correctamente"
+        );
+
+
+        await loadProducts();
+
+        await loadOrders();
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+      }
+
+    }
+
+
+  
+
+    createOrderButton.addEventListener(
+      "click",
+      createOrder
+    );
+
+
+    async function createOrder() {
+
+      const productId =
+        Number(orderProduct.value);
+
+      const quantity =
+        Number(orderQuantity.value);
+
+
+      if (!productId) {
+
+        showMessage(
+          "Debes seleccionar un producto",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (
+        !quantity ||
+        quantity < 1
+      ) {
+
+        showMessage(
+          "La cantidad debe ser mayor o igual a 1",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL + "/orders",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                product_id: productId,
+                quantity: quantity
+              })
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.detail ||
+            "No se pudo crear el pedido"
+          );
+
+        }
+
+
+        showMessage(
+          `Pedido creado correctamente. ID: ${data.id}`
+        );
+
+
+        orderProduct.value = "";
+
+        orderQuantity.value = 1;
+
+
+        await loadOrders();
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+      }
+
+    }
+
+
+ 
+
+    async function loadOrders() {
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL + "/orders"
+          );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "No se pudieron cargar los pedidos"
+          );
+
+        }
+
+
+        const orders =
+          await response.json();
+
+
+        renderOrders(orders);
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "No se pudieron cargar los pedidos",
+          "error"
+        );
+
+      }
+
+    }
+
+
+   
+
+    function renderOrders(orders) {
+
+      if (orders.length === 0) {
+
+        ordersTable.innerHTML = `
+          <tr>
+            <td
+              colspan="4"
+              class="empty"
+            >
+              No hay pedidos
+            </td>
+          </tr>
+        `;
+
+        return;
+      }
+
+
+      ordersTable.innerHTML =
+        orders
+          .map(order => {
+
+            const product =
+              products.find(
+                p =>
+                  p.id === order.product_id
+              );
+
+
+            const productName =
+              product
+                ? product.name
+                : `Producto ${order.product_id}`;
+
+
+            return `
+              <tr>
+
+                <td>
+                  ${order.id}
+                </td>
+
+                <td>
+                  ${escapeHtml(productName)}
+                </td>
+
+                <td>
+                  ${order.quantity}
+                </td>
+
+                <td>
+
+                  <div class="actions">
+
+                    <button
+                      class="btn-delete"
+                      onclick="deleteOrder(${order.id})"
+                    >
+                      Eliminar
+                    </button>
+
+                  </div>
+
+                </td>
+
+              </tr>
+            `;
+
+          })
+          .join("");
+
+    }
+
+
+  
+
+    async function deleteOrder(id) {
+
+      const confirmed =
+        confirm(
+          `¿Seguro que quieres eliminar el pedido #${id}?`
+        );
+
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${API_URL}/orders/${id}`,
+            {
+              method: "DELETE"
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.detail ||
+            "No se pudo eliminar el pedido"
+          );
+
+        }
+
+
+        showMessage(
+          "Pedido eliminado correctamente"
+        );
+
+
+        await loadOrders();
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          error.message,
+          "error"
+        );
+
+      }
+
+    }
+
+
+
+    function escapeHtml(value) {
+
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+    }
+
+
+
+
+    async function initialize() {
+
+      await loadProducts();
+
+      await loadOrders();
+
+    }
+
+
+    initialize();
+
+  </script>
+
+</body>
+
 </html>
